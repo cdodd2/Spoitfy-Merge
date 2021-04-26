@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useState} from 'react';
+import { Component, useState} from 'react';
 import { Button, View, Text, TextInput } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -26,11 +26,6 @@ function LoginScreen({ navigation }) {
       />
     </View>
   );
-}
-
-
-function populatePlaylists() {
-  const []
 }
 
 function PlaylistScreen({navigation}) {
@@ -107,8 +102,13 @@ function PlaylistNameScreen({ navigation }) {
         value={Name}
         onChangeText={setName}
       />
+      <Text>Select a merge type:</Text>
       <Button
-        title="Enter Name"
+        title="Random Merge"
+        onPress={() => navigation.navigate('Finish')}
+      />
+      <Button
+        title="Alternating Merge"
         onPress={() => navigation.navigate('Finish')}
       />
       <Text>{Name}</Text>
@@ -131,8 +131,22 @@ function FinishScreen({ navigation }) {
 
 const Stack = createStackNavigator();
 
-function App() {
-  return (
+export default class App extends Component {
+  constructor(props) {
+    super(props);
+    
+    this.state = {
+        items: [],
+        offset: 0,
+        isFetching: false,
+        query: 'Led Zeppelin',
+        token: null,
+    };
+
+}
+  render () {
+
+    return(
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Login" headerMode="none" mode="modal">
         <Stack.Screen name="Login" component={LoginScreen} />
@@ -141,7 +155,7 @@ function App() {
         <Stack.Screen name="Finish" component={FinishScreen} />
       </Stack.Navigator>
     </NavigationContainer>
-  );
+    );
+  }
 }
 
-export default App;
