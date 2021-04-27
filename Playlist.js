@@ -1,21 +1,6 @@
 import { TouchableWithoutFeedbackBase } from 'react-native';
 import getTracks from './getTracks';
 export default async (selectedPlaylists, token) => {
-
-
-
-
-    
-
-
-
-
-
-
-    var map = new Map();
-    selectedPlaylists = [];
-    selectedPlaylists.push(map.set('id', '37i9dQZF1DWSkMjlBZAZ07'));
-    selectedPlaylists.push(map.set('id', '37i9dQZF1DWSkMjlBZAZ07'));
     
 
     var trackLists = [];
@@ -26,8 +11,8 @@ export default async (selectedPlaylists, token) => {
     
     
     for (var i = 0; i < selectedPlaylists.length; i++){
-        console.log("The playlistID is : " + selectedPlaylists[i].get('id'));
-        var tracks = await getTracks(0, "37i9dQZF1DWSkMjlBZAZ07", token);
+        //console.log("The playlistID is : " + selectedPlaylists[i].get('id'));
+        var tracks = await getTracks(0, selectedPlaylists[i].id, token);
         trackLists.push(tracks);
         console.log("tracks length is: " + tracks.length);
 

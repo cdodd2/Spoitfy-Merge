@@ -8,6 +8,7 @@ import SelectBox from 'react-native-multi-selectbox';
 import {flatMap, xorBy} from 'lodash';
 import getPlaylists from './getPlaylists.js';
 import { FlatList } from 'react-native-gesture-handler';
+import Playlist from './Playlist'
 
 function LoginScreen({ navigation }) {
   return (
@@ -126,23 +127,49 @@ const [options, setOptions] = useState([
 
 function PlaylistDispScreen({ navigation }) {
 
-  const [thistoken, setToken] = useState('')
+  const [thistoken, setToken] = useState('peter dinklage')
   const [inProgress, setProgress] = useState(false)
   const [selectedPlaylists, setSelected] = useState([])
   const [trackList, setTracks] = useState([])
 
+  async function fetchToken() {
+    setToken(global.token)
+  }
+
+  async function fetchPlaylists() {
+    setSelected(global.selected)
+  }
+
+  async function checkData() {
+    if (thistoken && selectedPlaylists != undefined) {
+      return true
+    }
+  }
+  
+  async function getPlaylistData() {
+      var templist = await Playlist(selectedPlaylists, thistoken)
+      for(var i = 0; i < templist.length; i++){
+        //console.log("The song name is: " + templist[i].title);
+      }
+      setTracks(templist)
+  }
 
   useEffect(() => {
-    console.log("token: "+ thistoken)
-    setSelected(global.selected)
   }, [thistoken])
 
   useEffect(() => {
-    console.log("selected: "+ selectedPlaylists)
+    setProgress(true)
+    setProgress(false)
   }, [selectedPlaylists])
 
   useEffect(() => {
-    setToken(global.token)
+    const getData = async () => {
+      await fetchToken();
+      await fetchPlaylists();
+    }
+    if (checkData()) {
+      getData()
+    }
   }, [])
 
   const ItemSeparatorView = () => {
@@ -158,17 +185,27 @@ function PlaylistDispScreen({ navigation }) {
     );
   };
 
+  function showTracks(){
+    getPlaylistData()
+    console.log(trackList)
+  }
+
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       <Text>Your new playlist:</Text>
+      <Button
+        title="Show Tracks"
+        onPress={() => showTracks()}
+      />
+      <View style={{height: 50}}/>
       {selectedPlaylists.length ? 
-      <View style={{height: 400, width: 300, flexGrow: 0}}>
+      <View style={{height: 400, width: 350, flexGrow: 0}}>
         <FlatList
           ItemSeparatorComponent={ItemSeparatorView}
-          data={selectedPlaylists}
+          data={trackList}
           renderItem={({ item }) => (
-              <View style={{ backgroundColor: 'white' }}>
-                <Text>{item.item}</Text>
+              <View style={{ backgroundColor: 'white', justifyContent: 'center', height: 30}}>
+                <Text style={{textAlign: 'center', fontSize: 20}}>{item.title} <Text style={{color: "red"}}>by </Text>{item.artist}</Text>
               </View>
           )}
         />
