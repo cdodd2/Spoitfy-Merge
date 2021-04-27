@@ -1,43 +1,53 @@
-class Playlist {
-    constructor(playlistName, jsonTrackList) {
-        this.playlistName = playlistName;
+import { TouchableWithoutFeedbackBase } from 'react-native';
+import getTracks from './getTracks';
+export default async (selectedPlaylists, token) => {
 
 
 
-        var array = JSON.parse(jsonTrackList);
 
-        for (var i=0; i<array.length; ++i) {
-        
-        }
+    
 
 
 
-        /*
-            Once the json input is ready, find a way to parse through it and add everything to an array in this class
-
-
-            Example Code -->
-                var jsonString = '[{"offspring0":"John"},{"offspring1":"Anna"},{"offspring2":"Peter"}]';
-                var array = JSON.parse(jsonString);
-                var offsprings = [];
-                for (var i=0; i<array.length; ++i) {
-                  for (var key in array[i]) {
-                    if (key.match(/^offspring[0-9]+$/)) {
-                      offsprings.push(array[i][key]);
-                    }
-                  }
-                }
 
 
 
-            
-        */
+    var map = new Map();
+    selectedPlaylists = [];
+    selectedPlaylists.push(map.set('id', '37i9dQZF1DWSkMjlBZAZ07'));
+    selectedPlaylists.push(map.set('id', '37i9dQZF1DWSkMjlBZAZ07'));
+    
 
+    var trackLists = [];
+
+    console.log("Selected playlists length is: " + selectedPlaylists.length);
+
+
+    
+    
+    for (var i = 0; i < selectedPlaylists.length; i++){
+        console.log("The playlistID is : " + selectedPlaylists[i].get('id'));
+        var tracks = await getTracks(0, "37i9dQZF1DWSkMjlBZAZ07", token);
+        trackLists.push(tracks);
+        console.log("tracks length is: " + tracks.length);
 
     }
 
 
-    randomMerge(playlistOne, playlistTwo){
+    var finalPlaylist = [];
+    for (var i = 0; i < trackLists.length; i++){
+        finalPlaylist = randomMerge(finalPlaylist, trackLists[i]);
+    }
+
+    return finalPlaylist;
+};
+    
+
+
+
+
+
+    function randomMerge(playlistOne, playlistTwo){
         var finalList = [];
         while (playlistOne.length != 0 || playlistTwo.length != 0){
             if (playlistOne.length == 0){
@@ -66,7 +76,3 @@ class Playlist {
         }
         return finalList;
     }
-
-
-
-}
