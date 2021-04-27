@@ -1,10 +1,12 @@
 import * as React from 'react';
-import { Component, useState} from 'react';
+import { Component, useState, useEffect} from 'react';
 import { Button, View, Text, TextInput } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import spotifyToken from "./spotifyToken.js";
 import SelectBox from 'react-native-multi-selectbox';
 import {xorBy} from 'lodash';
+import getPlaylists from './getPlaylists.js';
 
 function LoginScreen({ navigation }) {
   return (
@@ -30,97 +32,99 @@ function LoginScreen({ navigation }) {
 
 function PlaylistScreen({navigation}) {
 
-const K_OPTIONS = [
-  {
-    item: 'Juventus',
-    id: 'JUVE',
-  },
-  {
-    item: 'Real Madrid',
-    id: 'RM',
-  },
-  {
-    item: 'Barcelona',
-    id: 'BR',
-  },
-  {
-    item: 'PSG',
-    id: 'PSG',
+const [thistoken, setToken] = useState('')
+const [isfetching, setFetch] = useState(false)
+
+async function populatePlaylists() {
+  setFetch(true)
+  const playlists = await getPlaylists({
+    q: '1223453181',
+    token: thistoken,
+  })
+  //console.log(playlists)
+  setOptions(playlists)   
+  //console.log(playlists)
+  setFetch(false)
+} 
+
+
+
+async function fetchToken() {
+  setToken(await spotifyToken())
+}
+
+useEffect(() => {
+  populatePlaylists()
+}, [thistoken])
+
+
+useEffect(() => { 
+  const getData = async () => {
+    await fetchToken();
+    //populatePlaylists();
   }
-]
+  getData()
+}, []);
+
+const [options, setOptions] = useState([
+    {
+      id: "",
+      item: ""
+    }
+  ]
+  )
+
   const [selectedItems, setSelectedItems] = useState([])
+
   return (
     <View style={{ flex: 1, justifyContent: 'center' }}>
       <Text style={{textAlign: 'center'}}>Playlists Available</Text>
       <View style={{margin: 30}}>
-      {K_OPTIONS.length ? (
+      {isfetching ? <Text style={{textAlign: 'center'}}>Fetching Playlists...</Text>
+      : options.length ? (
         <View>
           <SelectBox
-          style={{padding: 10}}
-          label="Select multiple"
-          options={K_OPTIONS}
-          selectedValues={selectedItems}
-          onMultiSelect={onMultiChange()}
-          onTapClose={onMultiChange()}
-          toggleIconColor={'#1DB954'}
-          searchIconColor={'#1DB954'}
-          arrowIconColor={'#1DB954'}
-          multiOptionContainerStyle={{backgroundColor: '#1DB954'}}
+            style={{padding: 10}}
+            label="Select multiple"
+            options={options}
+            selectedValues={selectedItems}
+            onMultiSelect={onMultiChange()}
+            onTapClose={onMultiChange()}
+            toggleIconColor={'#1DB954'}
+            searchIconColor={'#1DB954'}
+            arrowIconColor={'#1DB954'}
+            multiOptionContainerStyle={{backgroundColor: '#1DB954'}}
 
-          isMulti
-          />
+            isMulti
+          /> 
           <Button
           title="Select Playlists"
-          onPress={() => navigation.navigate('PlaylistName')}
+          onPress={() => navigation.navigate('PlaylistDisp')}
           />
         </View>
       ) : (
         <Text style={{textAlign: 'center'}}>No Playlists Found!</Text>
-      )}
+      ) 
+      }
       {selectedItems.map(select => <Text>{select.item}</Text>)}
       </View>
     </View>
   );
+
+  function playlistButtonPressed() {
+
+  }
 
   function onMultiChange() {
     return (item) => setSelectedItems(xorBy(selectedItems, [item], 'id'))
   }
 }
 
-function PlaylistNameScreen({ navigation }) {
-
-  const [Name, setName] = useState("");
-
+function PlaylistDispScreen({ navigation }) {
 
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Name your new playlist:</Text>
-      <TextInput
-        style={{height: 40}}
-        placeholder="Playlist Name"
-        defaultValue={''}
-        value={Name}
-        onChangeText={setName}
-      />
-      <Text>Select a merge type:</Text>
-      <Button
-        title="Random Merge"
-        onPress={() => navigation.navigate('Finish')}
-      />
-      <Button
-        title="Alternating Merge"
-        onPress={() => navigation.navigate('Finish')}
-      />
-      <Text>{Name}</Text>
-    </View>
-  );
-}
-
-function FinishScreen({ navigation }) {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Playlist Created</Text>
-      <Text>Open Spotify to see your new playlist</Text>
+      <Text>Your new playlist:</Text>
       <Button
         title="Create Another Playlist"
         onPress={() => navigation.navigate('Playlists')}
@@ -136,11 +140,6 @@ export default class App extends Component {
     super(props);
     
     this.state = {
-        items: [],
-        offset: 0,
-        isFetching: false,
-        query: 'Led Zeppelin',
-        token: null,
     };
 
 }
@@ -151,8 +150,7 @@ export default class App extends Component {
       <Stack.Navigator initialRouteName="Login" headerMode="none" mode="modal">
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Playlists" component={PlaylistScreen} />
-        <Stack.Screen name="PlaylistName" component={PlaylistNameScreen} />
-        <Stack.Screen name="Finish" component={FinishScreen} />
+        <Stack.Screen name="PlaylistDisp" component={PlaylistDispScreen} />
       </Stack.Navigator>
     </NavigationContainer>
     );

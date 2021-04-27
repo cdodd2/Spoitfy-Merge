@@ -1,7 +1,7 @@
 const apiPrefix = 'https://api.spotify.com/v1';
 
-export default async ({offset, limit, q, token,}) => {
-    const searchUrl = `${apiPrefix}/users/${q}/playlists?offset=${offset}&limit=${limit}`;
+export default async ({q, token}) => {
+    const searchUrl = `${apiPrefix}/users/${q}/playlists?offset=0&limit=50`;
     // console.log('starting search, searchURL is ' + searchUrl);
     const params = {
         method: 'GET',
@@ -19,14 +19,11 @@ export default async ({offset, limit, q, token,}) => {
     const { items } = jsonObj;
 
     
-    console.log ('the json results returned is \n' + jsonObj.items );
+    //console.log ('the json results returned is \n' + jsonObj.items );
 
-    return items.map(item => ({
-        id: item.id,
-        title: item.name,
-        imageUri: item.images
-            ? item.images[0].url
-            : undefined
+    return items.map(el => ({
+        id: el.id,
+        item: el.name
     }));
 
 };
