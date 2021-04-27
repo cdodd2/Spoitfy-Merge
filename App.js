@@ -5,8 +5,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import spotifyToken from "./spotifyToken.js";
 import SelectBox from 'react-native-multi-selectbox';
-import {xorBy} from 'lodash';
+import {flatMap, xorBy} from 'lodash';
 import getPlaylists from './getPlaylists.js';
+import { FlatList } from 'react-native-gesture-handler';
 
 function LoginScreen({ navigation }) {
   return (
@@ -35,6 +36,7 @@ function PlaylistScreen({navigation}) {
 const [thistoken, setToken] = useState('')
 const [isfetching, setFetch] = useState(false)
 
+
 async function populatePlaylists() {
   setFetch(true)
   const playlists = await getPlaylists({
@@ -55,6 +57,7 @@ async function fetchToken() {
 
 useEffect(() => {
   populatePlaylists()
+  global.token = thistoken
 }, [thistoken])
 
 
@@ -99,20 +102,21 @@ const [options, setOptions] = useState([
           /> 
           <Button
           title="Select Playlists"
-          onPress={() => navigation.navigate('PlaylistDisp')}
+          onPress={() => playlistButtonPressed()}
           />
         </View>
       ) : (
         <Text style={{textAlign: 'center'}}>No Playlists Found!</Text>
       ) 
       }
-      {selectedItems.map(select => <Text>{select.item}</Text>)}
       </View>
     </View>
   );
 
   function playlistButtonPressed() {
-
+    global.selected = selectedItems
+    
+    navigation.navigate('PlaylistDisp')
   }
 
   function onMultiChange() {
@@ -122,9 +126,55 @@ const [options, setOptions] = useState([
 
 function PlaylistDispScreen({ navigation }) {
 
+  const [thistoken, setToken] = useState('')
+  const [inProgress, setProgress] = useState(false)
+  const [selectedPlaylists, setSelected] = useState([])
+  const [trackList, setTracks] = useState([])
+
+
+  useEffect(() => {
+    console.log("token: "+ thistoken)
+    setSelected(global.selected)
+  }, [thistoken])
+
+  useEffect(() => {
+    console.log("selected: "+ selectedPlaylists)
+  }, [selectedPlaylists])
+
+  useEffect(() => {
+    setToken(global.token)
+  }, [])
+
+  const ItemSeparatorView = () => {
+    return (
+      // FlatList Item Separator
+      <View
+          style={{
+              height: 0.5,
+              width: '100%',
+              backgroundColor: '#C8C8C8'
+          }}
+      />
+    );
+  };
+
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       <Text>Your new playlist:</Text>
+      {selectedPlaylists.length ? 
+      <View style={{height: 400, width: 300, flexGrow: 0}}>
+        <FlatList
+          ItemSeparatorComponent={ItemSeparatorView}
+          data={selectedPlaylists}
+          renderItem={({ item }) => (
+              <View style={{ backgroundColor: 'white' }}>
+                <Text>{item.item}</Text>
+              </View>
+          )}
+        />
+      </View>
+      : <Text style={{textAlign: 'center'}}>No Tracks Found!</Text>
+      }
       <Button
         title="Create Another Playlist"
         onPress={() => navigation.navigate('Playlists')}
