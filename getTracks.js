@@ -1,6 +1,6 @@
 const apiPrefix = 'https://api.spotify.com/v1';
 
-export default async ({offset, limit, q, token,}) => {
+export default async ({q, token,}) => {
     const searchUrl = `${apiPrefix}/playlists/${q}/tracks?offset=0&limit=100&market=ES`;
     // console.log('starting search, searchURL is ' + searchUrl);
     const params = {
